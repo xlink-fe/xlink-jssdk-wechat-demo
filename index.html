@@ -53,7 +53,14 @@
 <script type="text/javascript" src="jquery-3.2.1.min.js"></script>
 <script type="text/javascript" src="xsdk.js"></script>
 <script>
-// 注意此demo必须在配好微信公众号，和云智易应用下运行！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+// 注意此demo必须在配好微信公众号，和云智易应用下运行！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！(参考https://docs.xlink.cn/pages/viewpage.action?pageId=4063254)
+// 配置完公众号后，请更改以下代码中的云智易appId
+
+// 把文件放到服务器上，使用微信开发者工具访问页面
+// 例如放到服务器地址为http://test.cn的wechat文件夹下面则访问，且微信的公众号id为wx6bce565776a81ced
+// 则访问地址为：
+// https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx6bce565776a81ced&redirect_uri=http://test.cn/wechat/index.html&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect
+
 // 封装请求
 function sdkAjax(type, url, cb, errcb) {
     $.ajax({
@@ -76,8 +83,8 @@ var devicesList = [] // 初始化后的sdk设备的类，可以获取和操作�
 var dataPoint = [] // 数据端点的值
 var userid = ''
 var authorize = ''
-var baseUrl = 'http://139.196.164.250:8081' // 云智易微信refustFul地址（如独立部署找相应的地址）
-var platformUrl = 'http://api-test.xlink.io:1080' // 云智易平台URL（如独立部署找相应的地址）
+var baseUrl = 'http://wx.xlink.cn' // 云智易微信refustFul地址（如独立部署找相应的地址）
+var platformUrl = 'http://api2.xlink.cn' // 云智易平台URL（如独立部署找相应的地址）
 var XLINKAPPID = '2e07d2b1f2cdae00' // 云智易平台应用AppId（请修改对应的云智易应用appId）
 
 // 获取url上的code参数
@@ -150,7 +157,7 @@ function getToken() {
             // 如果conn_prot为2, new下面的实例
             ws = new XSDK('mqtt', {
                 type: 'app',
-                host: 'ws://54.222.229.62:8080/mqtt',
+                host: 'ws://mqtt.xlink.cn:23801/mqtt',
                 //host: 'ws://mqtt.xlink.cn:23801/mqtt',
                 userid: userid + '', // 用户在云智易平台的user_id，通过获取OpenID接口获取
                 authorize: authorize, // 用户在云智易平台的authorize，通过获取OpenID接口获取
