@@ -224,27 +224,28 @@ function change() {
         alert('端点索引类型不能为空')
         return
     }
-    
+
     // 布尔类型转换
-    if (Number(datatype) === 1) {
-        dataval = dataval === 'true' ? true : false
-    }
+    // if (Number(datatype) === 1) {
+    //     dataval = dataval === 'true' ? true : false
+    // }
+    var dataArr = [{
+        index: dataindex * 1, // 数据端点索引
+        value: dataval, // 数据端点值
+        type: datatype * 1 // 这个要看文档上的数据端点的列表枚举，string为6
+    }]
 
     devicesList[0].emit('senddata', {
         type: 'datapoint',
-        data: [{
-            index: dataindex, // 数据端点索引
-            value: dataval, // 数据端点值
-            type: datatype // 这个要看文档上的数据端点的列表枚举，string为6
-        }]
+        data: dataArr
     }, function(res) {
         if (res.status === 0) {
             alert("发送成功");
             // 需要手动更新页面的端点
             deviceProb([{
-                index: dataindex * 1, // 整数
-                value: dataval,
-                type: datatype
+                index: $('#index')[0].value * 1,
+                value: $('#dataval')[0].value,
+                type: $('#typeopt')[0].value * 1
             }])
         } else {
             alert("发送失败,状态:" + res.status)
