@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>xlink-jssdk-wechat-demo</title>
+    <meta name ="viewport" content ="initial-scale=1, maximum-scale=3, minimum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="">
+    <style type="text/css">
+    html,body{
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    .name {
+        width: 100px;
+        display: inline-block;
+    }
+    </style>
+</head>
+
+<body style="overflow: auto;padding: 10px;box-sizing: border-box;">
+    <div>
+        <div>
+            <span class="name">索引</span>
+            <input type="text" placeholder="请输入数据端点索引" id="index">
+        </div>
+        <div>
+            <span class="name">端点值</span>
+            <input type="text" placeholder="请输入数据端点值" id="dataval">
+        </div>
+        <div>
+            <span class="name">端点类型</span>
+            <select id="typeopt">
+                <option value="1">布尔类型</option>
+                <option value="2">单字节(无符号)</option>
+                <option value="3">16位短整型(有符号)</option>
+                <option value="4">32位整型(有符号)</option>
+                <option value="5" selected>浮点</option>
+                <option value="6">字符串</option>
+                <option value="7">字节数组(暂不支持微信端)</option>
+                <option value="8">16位短整型(无符号)</option>
+                <option value="9">32位整型(无符号)</option>
+            </select>
+        </div>
+        <div>
+            <button style="margin-left:104px " onclick="change()">发送数据端点</button>
+        </div>
+    </div>
+    <div id="dataPoint" style="margin-top: 20px;"></div>
+</body>
+<script type="text/javascript" src="jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="xsdk.js"></script>
+<script>
+// 注意此demo必须在配好微信公众号，和云智易应用下运行！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+// 封装请求
+function sdkAjax(type, url, cb, errcb) {
+    $.ajax({
+        url: url,
+        type: type,
+        beforeSend: function(xhr) { xhr.setRequestHeader('Access-Token', window.localStorage.getItem('accessToken')) }, //这里设置header
+        success: function(data) {
+            cb(data)
+        },
+        error: function(err) {
+            if (errcb == undefined) return
+            errcb(err)
+        }
+    })
+}
+
+var ws = null
+var devices = [] // 原始的数据端点
+var devicesList = [] // 初始化后的sdk设备的类，可以获取和操作数据端点
+var dataPoint = [] // 数据端点的值
+var userid = ''
+var authorize = ''
+var baseUrl = 'http://139.196.164.250:8081' // 云智易微信refustFul地址（如独立部署找相应的地址）
+var platformUrl = 'http://api-test.xlink.io:1080' // 云智易平台URL（如独立部署找相应的地址）
+var XLINKAPPID = '2e07d2b1f2cdae00' // 云智易平台应用AppId（请修改对应的云智易应用appId）
+
+// 获取url上的code参数
+function getSearchCode() {
+    let search = location.href
+    let searchs = {}
+    let strs
+    if (search.indexOf('?') !== -1) {
+        search = search.substr(search.indexOf('?') + 1)
+        strs = search.split('&')
+        for (let i = 0; i < strs.length; i++) {
+            searchs[strs[i].split('=')[0]] = decodeURIComponent(strs[i].split('=')[1])
+        }
+    }
+    window.localStorage.setItem('code', searchs['code'])
+    return searchs['code']
+}
+
+// 获取openid
+sdkAjax('get', baseUrl + '/v2/wechat_gateway/' + XLINKAPPID + '/get_open_id?code=' + getSearchCode(), function(data) {
+    console.log(data)
+    window.localStorage.setItem('openId', data.open_id)
+    getToken()
+
+}, function() {
+    // 因为code码只能使用一次，页面刷新的时候code失效，所以这样避免页面错误
+    if (window.localStorage.getItem('openId')) {
+        getToken()
+    } else{
+        alert('请求出错')
+    }
+})
+
+
+
+
+
+function getToken() {
+    // 获取管理台的token
+    sdkAjax('get', baseUrl + '/v2/wechat_gateway/' + XLINKAPPID + '/wx_access_token?open_id=' + window.localStorage.getItem('openId') + '&resource=wechat', function(data) {
+        window.localStorage.setItem('accessToken', data.access_token)
+        userid = data.user_id
+        authorize = data.authorize
+
+        // 获取设备的列表
+        sdkAjax('get', baseUrl + '/v2/wechat_gateway/' + XLINKAPPID + '/wx_device_list?access_token=XLINKUserAccessToken&open_id=' + window.localStorage.getItem('openId'), function(data) {
+
+            
+            devices = data.devices
+            if (!devices.length) return
+
+
+            // sdkAjax('get', platformUrl + '/v2/product/' + devices[0].device_pid + '/v_device/' + devices[0].device_id, function(data) {
+            //     // 如果data.conn_prot为2，设备协议选择mqtt，如果为1选择websocket
+            //     // data.online可以判断当前设备是否在线，如果不在线无法发送和接收设备上报的数据端点
+            //     console.log(data)
+            // })
+
+
+            // 以下为sdk操作实例，值得注意根据设备协议选择mqtt或者websocket，以下为mqtt的例子,websocket用法一样
+
+            // 如果conn_prot为1, new下面的实例
+            // ws = new XSDK('websocket', {
+            //     // host: 'https://cm2.xlink.cn:443',
+            //     userid: userid, // 用户在云智易平台的user_id，通过获取OpenID接口获取
+            //     authorize: authorize, // 用户在云智易平台的用户认证码，通过获取OpenID接口获取
+            //     dp_version: 2 // 非必填，默认为1, 根据硬件的数据端点协议版本确定
+            // })
+
+            // 如果conn_prot为2, new下面的实例
+            ws = new XSDK('mqtt', {
+                type: 'app',
+                host: 'ws://54.222.229.62:8080/mqtt',
+                //host: 'ws://mqtt.xlink.cn:23801/mqtt',
+                userid: userid + '', // 用户在云智易平台的user_id，通过获取OpenID接口获取
+                authorize: authorize, // 用户在云智易平台的authorize，通过获取OpenID接口获取
+                keepAliveInterval: 40, // 非必填，mqtt通讯时长，默认为40s，每40s发送ping请求
+            })
+
+
+            ws.on('ready', function() {
+                console.log('成功连上了')
+                ws.emit('adddevices', devices) //_devices 表示用户绑定设备列表
+            })
+
+            ws.on('devicesready', function(devices) {
+                devicesList = devices
+                console.log(devices)
+                if (!devicesList.length) {
+                    alert('没有添加设备')
+                    return
+                }
+                // devices 表示设备对象数组，这里是拿所有设备的端点值和端点变化的事件,on事件只写一次，事件返回就会触发，emit事件可以写多次
+                devicesList[0].emit('probe', function(data) {
+                    // 处理数据端点返回，获取设备的数据端点
+
+                    dataPoint = data.data.sort(function(a, b) {
+                        return a.index - b.index
+                    })
+
+                    console.log(dataPoint)
+                    updateData(dataPoint)
+
+                })
+                devicesList[0].on('data', function(data) {
+                    if (data.type === 'datapoint') {
+                        // 数据端点
+                        console.log(data)
+                        deviceProb(data.data)
+                    }
+                })
+            })
+
+            ws.on('error', function(err) {
+                console.log(err)
+                ws = null
+                devices = []
+                devicesList = []
+            })
+        })
+    })
+}
+
+
+// 改变数据端点的状态
+function change() {
+    // 发送端点数据，必须实例化sdk之后才能触发事件
+    if (!devicesList.length) {
+        alert('sdk还没有初始化')
+        return
+    }
+
+    var dataindex = $('#index')[0].value
+    var dataval = $('#dataval')[0].value
+    var datatype = $('#typeopt')[0].value
+    if (!dataindex || !dataval || !datatype) {
+        alert('端点索引类型不能为空')
+        return
+    }
+    
+    // 布尔类型转换
+    if (Number(datatype) === 1) {
+        dataval = dataval === 'true' ? true : false
+    }
+
+    devicesList[0].emit('senddata', {
+        type: 'datapoint',
+        data: [{
+            index: dataindex, // 数据端点索引
+            value: dataval, // 数据端点值
+            type: datatype // 这个要看文档上的数据端点的列表枚举，string为6
+        }]
+    }, function(res) {
+        if (res.status === 0) {
+            alert("发送成功");
+            // 需要手动更新页面的端点
+            deviceProb([{
+                index: dataindex * 1, // 整数
+                value: dataval,
+                type: datatype
+            }])
+        } else {
+            alert("发送失败,状态:" + res.status)
+        }
+    })
+}
+
+// 处理设备上报的数据端点
+function deviceProb(data) {
+    data.forEach(changData => {
+        if (!dataPoint.length) {
+            dataPoint.push({
+                index: changData.index,
+                value: changData.value
+            })
+        } else {
+            dataPoint.forEach((item, index) => {
+                if (item.index === changData.index) {
+                    dataPoint.splice(index, 1, {
+                        index: changData.index,
+                        value: changData.value
+                    })
+                }
+            })
+        }
+    })
+    updateData(dataPoint)
+}
+
+
+// 处理数据端点渲染
+function updateData(data) {
+    var str = `<table style="width:100%" border="1" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>索引</th>
+                            <th>端点</th>
+                        </tr>
+                    </thead>
+                    <tbody>`
+    data.forEach(function(item) {
+        str += '<tr><td>' + item.index + '</td><td>' + item.value + '</td></tr>'
+    })
+    str += '</tbody></table>'
+    $('#dataPoint').html(str)
+}
+
+
+// 获取设备日志
+function fetchLogs() {
+    if (!devicesList.length) {
+        alert('sdk还没有初始化')
+        return
+    }
+    devicesList[0].emit('log', function(res) {
+        console.log(res)
+        if (res.data) {
+            // var obj = JSON.parse(JSON.stringfy(res.data))
+            // obj.time = new Date(obj.timestamp).toString()
+            // logs.push(obj)
+        }
+    })
+}
+</script>
+
+</html>
