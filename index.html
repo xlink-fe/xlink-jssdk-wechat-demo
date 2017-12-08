@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>xlink-jssdk-wechat-demo</title>
     <meta name="viewport" content="initial-scale=1, maximum-scale=3, minimum-scale=1, user-scalable=no">
-    <link rel="stylesheet" href="static/bootstrap-3.3.7-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="static/bootstrap.css">
     <style type="text/css">
     html,
     body {
@@ -216,7 +216,7 @@ function getToken() {
                 type: 'app',
                 host: 'ws://mqtt.xlink.cn:23801/mqtt',
                 //host: 'ws://mqtt.xlink.cn:23801/mqtt',
-                userid: userid + '', // 用户在云智易平台的user_id，通过获取OpenID接口获取
+                userid: userid + '', // 用户在云智易平台的user_id，通过获取OpenID接口获取(虚为字符串)
                 authorize: authorize, // 用户在云智易平台的authorize，通过获取OpenID接口获取
                 keepAliveInterval: 40, // 非必填，mqtt通讯时长，默认为40s，每40s发送ping请求
             })
