@@ -389,6 +389,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _curMessageId = 0;
 	var MAX_MESSAGE_SIZE = 256;
 	var isPlatform = false;
+	var isappLogin = false;
 
 	function initWebsocket(xsdk, option) {
 	  xsdk.host = option.host;
@@ -449,7 +450,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // 输出状态
 	    _outputLogs(data);
 	  }).on('error', function (error) {
-	    _xsdk.emit(_enum.SDKEvent.ERROR, error);
+	    _xsdk && _xsdk.emit(_enum.SDKEvent.ERROR, error);
 	  });
 	}
 
@@ -470,9 +471,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (isPlatform) {
 	    clearVariables();
 	  } else {
-	    _socket.emit(_protocol2.default.logout.events, (0, _lang.clone)(_protocol2.default.logout.params), function (data) {
+	    if (isappLogin) {
+	      _socket.emit(_protocol2.default.logout.events, (0, _lang.clone)(_protocol2.default.logout.params), function (data) {
+	        clearVariables();
+	      });
+	    } else {
 	      clearVariables();
-	    });
+	    }
 	  }
 	}
 
@@ -644,6 +649,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function _loginRecv() {
+	  isappLogin = true;
 	  if (!_xsdk) {
 	    return;
 	  }
