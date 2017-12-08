@@ -95,6 +95,8 @@
 
 // 封装请求
 function sdkAjax(type, url, cb, errcb) {
+    console.log('ajax')
+    console.log(url)
     $.ajax({
         url: url,
         type: type,
@@ -103,6 +105,7 @@ function sdkAjax(type, url, cb, errcb) {
             cb(data)
         },
         error: function(err) {
+            console.log(err)
             if (errcb == undefined) return
             errcb(err)
         }
@@ -119,8 +122,12 @@ var socketObj = null // 当前设备的类
 var conn_prot = 1 // 1为mqtt,2为websocket
 var userid = ''
 var authorize = ''
-var baseUrl = 'http://wx.xlink.cn' // 云智易微信refustFul地址（如独立部署找相应的地址）
-var platformUrl = 'http://api2.xlink.cn' // 云智易平台URL（如独立部署找相应的地址）
+// var baseUrl = 'http://wx.xlink.cn' // 云智易微信refustFul地址（如独立部署找相应的地址）
+// var platformUrl = 'http://api2.xlink.cn' // 云智易平台URL（如独立部署找相应的地址）
+// var XLINKAPPID = '2e07d2b1f2cdae00' // 云智易平台应用AppId（请修改对应的云智易应用appId）
+
+var baseUrl = 'http://139.196.164.250:8081' // 云智易微信refustFul地址（如独立部署找相应的地址）
+var platformUrl = 'http://api-test.xlink.io:1080' // 云智易平台URL（如独立部署找相应的地址）
 var XLINKAPPID = '2e07d2b1f2cdae00' // 云智易平台应用AppId（请修改对应的云智易应用appId）
 
 // 获取url上的code参数
@@ -141,7 +148,8 @@ function getSearchCode() {
 
 // 获取虚拟设备的端口
 function getVdevice (productId, deviceId, cb, errcb) {
-    sdkAjax('get', platformUrl + 'product/' + productId + '/v_device/' + deviceId, cb,errcb)
+    console.log(2341)
+    sdkAjax('get', platformUrl + '/v2/product/' + productId + '/v_device/' + deviceId, cb,errcb)
 }
 
 // 获取openid
@@ -196,10 +204,13 @@ function getToken() {
 
 
 function initSdk() {
+    console.log(1234)
+    console.log(devices.length)
     // 获取设备的列表
     if (!devices.length) return
-
+    console.log($('#deviceList')[0].value)
     getVdevice(getProductId($('#deviceList')[0].value, devices), $('#deviceList')[0].value, function(data) {
+        console.log(080977)
         if (data.conn_prot === 1) {
             var html = `<h4>发送透传</h4>
             <div class="form-horizontal" >
@@ -249,7 +260,7 @@ function initSdk() {
 
         if (data.conn_prot === 1) {
             ws = new XSDK('websocket', {
-                host: 'http://cm2.xlink.cn:23777',
+                host: '42.121.122.23:23775',
                 userid: userid + '',
                 authorize: authorize,
                 dp_version: 2
@@ -257,7 +268,7 @@ function initSdk() {
         } else {
             ws = new XSDK('mqtt', {
                 type: 'app',
-                host: 'ws://mqtt.xlink.cn:23801/mqtt',
+                host: 'ws://54.222.229.62:8080/mqtt',
                 userid: userid + '', // 用户在云智易平台的user_id，通过获取OpenID接口获取
                 authorize: authorize, // 用户在云智易平台的authorize，通过获取OpenID接口获取
                 keepAliveInterval: 40, // 非必填，mqtt通讯时长，默认为40s，每40s发送ping请求
