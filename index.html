@@ -141,7 +141,7 @@ function getSearchCode() {
 
 // 获取虚拟设备的端口
 function getVdevice (productId, deviceId, cb, errcb) {
-    sdkAjax('get', platformUrl + 'product/' + productId + '/v_device/' + deviceId, cb,errcb)
+    sdkAjax('get', platformUrl + '/v2/product/' + productId + '/v_device/' + deviceId, cb,errcb)
 }
 
 // 获取openid
