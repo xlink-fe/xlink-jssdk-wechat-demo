@@ -9,6 +9,6 @@
 
 #### 第三步：使用微信开发者工具访问页面
 ```
-如放到服务器地址为http://test.cn的wechat文件夹下面则访问，且微的公众号id为wx6bce565776a81ced则访问地址为：
+如放到服务器地址为http://test.cn的wechat文件夹下面则访问，且微信的公众号id为wx6bce565776a81ced则访问地址为：
 https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx6bce565776a81ced&redirect_uri=http://test.cn/wechat/index.html&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect
 ```
