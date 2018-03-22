@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <title>xlink-jssdk-wechat-demo</title>
     <meta name="viewport" content="initial-scale=1, maximum-scale=3, minimum-scale=1, user-scalable=no">
-    <link rel="stylesheet" href="static/bootstrap.css">
+    <link rel="stylesheet" href="../static/bootstrap.css">
     <style type="text/css">
     html,
     body {
@@ -23,48 +22,180 @@
 </head>
 
 <body style="overflow: auto;padding: 10px;box-sizing: border-box;">
-    <!-- 设备列表 -->
-    <a href="verson/mqtt.html">mqtt</a>
-    <a href="verson/prope.html">prope</a>
-    <a href="verson/websocket.html">websocket</a>
-    <div id="device" class="form-horizontal"></div>
-    <!-- 索引端点 -->
-    <h4>发送数据端点</h4>
-    <div class="form-horizontal">
-        <div class="form-group">
-            <label for="index" class="col-sm-2 control-label">索引</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="index" placeholder="请输入数据端点索引">
-            </div>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-4">
+          <!-- 数据端点 -->
+          <h4>1111111111111111</h4>
+          <h5>在线</h5>
+          <table style="width:100%" border="1" cellspacing="0" class="table table-bordered">
+              <thead>
+                  <tr>
+                      <th>索引</th>
+                      <th>端点</th>
+                  </tr>
+              </thead>
+          </table>
         </div>
-        <div class="form-group">
-            <label for="dataval" class="col-sm-2 control-label">端点值</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="dataval" placeholder="请输入数据端点值">
-            </div>
+        
+        <div class="col-md-4">
+          <!-- 数据端点 -->
+          <h4>1111111111111111</h4>
+          <table style="width:100%" border="1" cellspacing="0" class="table table-bordered">
+              <thead>
+                  <tr>
+                      <th>索引</th>
+                      <th>端点</th>
+                  </tr>
+              </thead>
+          </table>
         </div>
-        <div class="form-group">
-            <label class="col-sm-2 control-label">端点类型</label>
-            <div class="col-sm-10">
-                <select id="typeopt" class="form-control">
-                    <option value="1">布尔类型</option>
-                    <option value="2">单字节(无符号)</option>
-                    <option value="3">16位短整型(有符号)</option>
-                    <option value="4">32位整型(有符号)</option>
-                    <option value="5">浮点</option>
-                    <option value="6">字符串</option>
-                    <option value="7">字节数组(暂不支持微信端)</option>
-                    <option value="8">16位短整型(无符号)</option>
-                    <option value="9">32位整型(无符号)</option>
-                </select>
-            </div>
+
+        <div class="col-md-4">
+          <!-- 数据端点 -->
+          <h4>1111111111111111</h4>
+          <table style="width:100%" border="1" cellspacing="0" class="table table-bordered">
+              <thead>
+                  <tr>
+                      <th>索引</th>
+                      <th>端点</th>
+                  </tr>
+              </thead>
+          </table>
         </div>
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <button class="btn btn-danger" onclick="change()">发送数据端点</button>
-            </div>
-        </div>
+      </div>
     </div>
+
+    <!-- 发送数据端点 -->
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-4">
+            <!-- 索引端点 -->
+            <h4 style="text-align:center;">发送数据端点</h4>
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label for="index" class="col-sm-4 control-label">索引</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="index" placeholder="请输入数据端点索引">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="dataval" class="col-sm-4 control-label">端点值</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="dataval" placeholder="请输入数据端点值">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">端点类型</label>
+                    <div class="col-sm-6">
+                        <select id="typeopt" class="form-control">
+                            <option value="1">布尔类型</option>
+                            <option value="2">单字节(无符号)</option>
+                            <option value="3">16位短整型(有符号)</option>
+                            <option value="4">32位整型(有符号)</option>
+                            <option value="5">浮点</option>
+                            <option value="6">字符串</option>
+                            <option value="7">字节数组(暂不支持微信端)</option>
+                            <option value="8">16位短整型(无符号)</option>
+                            <option value="9">32位整型(无符号)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-4 col-sm-6">
+                        <button class="btn btn-danger" onclick="change()">发送数据端点</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div style="height:1500px;"></div>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-4">
+            <!-- 设备列表 -->
+            <div id="device" class="form-horizontal"></div>
+        </div>
+
+
+        <div class="col-md-4">
+            <!-- 索引端点 -->
+            <h4>发送数据端点</h4>
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label for="index" class="col-sm-6 control-label">索引</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="index" placeholder="请输入数据端点索引">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="dataval" class="col-sm-6 control-label">端点值</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="dataval" placeholder="请输入数据端点值">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-6 control-label">端点类型</label>
+                    <div class="col-sm-6">
+                        <select id="typeopt" class="form-control">
+                            <option value="1">布尔类型</option>
+                            <option value="2">单字节(无符号)</option>
+                            <option value="3">16位短整型(有符号)</option>
+                            <option value="4">32位整型(有符号)</option>
+                            <option value="5">浮点</option>
+                            <option value="6">字符串</option>
+                            <option value="7">字节数组(暂不支持微信端)</option>
+                            <option value="8">16位短整型(无符号)</option>
+                            <option value="9">32位整型(无符号)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-6 col-sm-6">
+                        <button class="btn btn-danger" onclick="change()">发送数据端点</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-4">
+            <!-- 数据端点 -->
+            <div id="dataPoint" style="margin-top: 20px;">
+                <table style="width:100%" border="1" cellspacing="0" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>索引</th>
+                            <th>端点</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+      </div>
+    </div>
+
+
+    
+    
     <!--透传，仅支持websocket的-->
     <div id="pipecontainer">
     </div>
@@ -72,22 +203,12 @@
     <div id="logs">
         
     </div>
-    <!-- 数据端点 -->
-    <div id="dataPoint" style="margin-top: 20px;">
-        <table style="width:100%" border="1" cellspacing="0" class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>索引</th>
-                    <th>端点</th>
-                </tr>
-            </thead>
-        </table>
-    </div>
+    
 </body>
-<script type="text/javascript" src="static/jquery-3.2.1.min.js"></script>
-<script type="text/javascript" src="static/xsdk.js"></script>
-<script type="text/javascript" src="static/bootstrap.min.js"></script>
-<script type="text/javascript" src="api/index.js"></script>
+<script type="text/javascript" src="../static/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="../static/xsdk.js"></script>
+<script type="text/javascript" src="../static/bootstrap.min.js"></script>
+<script type="text/javascript" src="../api/index.js"></script>
 <script>
 // 注意此demo必须在配好微信公众号，和云智易应用下运行！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！(参考https://docs.xlink.cn/pages/viewpage.action?pageId=4063254)
 // 配置完公众号后，请更改以下代码中的云智易appId
@@ -137,6 +258,7 @@ function getAppToken () {
 function fetchDevice () {
     fetchDeviceList(function(data) {
         devices = data.devices
+        console.log(devices)
 
         var str = '<div class="form-group"><label class="col-sm-2 control-label">当前设备</label><div class="col-sm-10"><select id="deviceList" class="form-control">'
         devices.forEach(function(item) {
