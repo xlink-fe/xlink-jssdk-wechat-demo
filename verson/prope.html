@@ -344,7 +344,17 @@ function initPropeConnect() {
             })
 
             // 4.获取设备日志
-            fetchLogs(item)
+            item.on('log', function(res) {
+                console.log(res)
+                if (res.data) {
+                    // 输出设备日志
+                    var obj = res.data
+                    obj.time = new Date(obj.timestamp).toString()
+                    var str = '<li class="list-group-item"><div>'+obj.time+'</div><div>'+obj.msg+'</div></li>'
+                    console.log(str)
+                    $('#logsList' + res.deviceId).append(str)
+                }
+            })
 
 
             // 5.监听设备上下线
@@ -362,31 +372,6 @@ function initPropeConnect() {
     })
 }
 
-// 获取设备日志
-function fetchLogs(socketObject) {
-    if (!devicesList.length) {
-        console.error('sdk还没有初始化')
-        return
-    }
-    socketObject.on('log', function(res) {
-        console.log(res)
-        console.log(socketObject)
-        if (res.data) {
-            // 输出设备日志
-            var obj = res.data
-            obj.time = new Date(obj.timestamp).toString()
-            var str = '<li class="list-group-item"><div>'+obj.time+'</div><div>'+obj.msg+'</div></li>'
-            console.log(str)
-            $('#logsList' + res.deviceId).append(str)
-            
-            // 获取设备日志上下线通知,调用resetful接口获取最终的状态
-            // if (res.data.type == 1 || res.data.type == 2) {
-            //     console.log(res.data.type)
-            //     upOnlineStatus(socketObject.pid, socketObject.id)
-            // }
-        }
-    })
-}
 
 // 改变数据端点的状态
 function change() {
