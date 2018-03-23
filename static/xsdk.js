@@ -10783,6 +10783,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'onMessageArrived',
 	    value: function onMessageArrived(res) {
+	      console.log(res);
 	      if (res && res.destinationName) {
 	        var arr = res.destinationName.split('/');
 	        if (arr.length > 1) {
@@ -10815,7 +10816,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: '_writeEvent',
 	    value: function _writeEvent(topic, deviceId, callback) {
-	      if (this._devices[deviceId] && !this._devices[deviceId][topic] && callback && (0, _lang.isFunction)(callback)) {
+	      if (this._devices[deviceId] && callback && (0, _lang.isFunction)(callback)) {
 	        this._devices[deviceId][topic] = function (message) {
 	          var result = null;
 	          if (/\$6\/\d+/.test(message.destinationName)) {
@@ -10969,6 +10970,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	        });
 	      } else {
+	        // 自动覆盖事件
+	        this._writeEvent(topic, deviceId, function (res) {
+	          if (callback && (0, _lang.isFunction)(callback)) {
+	            callback({ data: res, deviceId: deviceId });
+	          }
+	        });
 	        // 订阅成功发送自动获取数据端点
 	        this._sendMessage({ topic: 'getPoint', deviceId: deviceId });
 	      }
@@ -10984,7 +10991,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	      }
 	      var device = this._devices[deviceId];
-	      device.emit(_enum.deviceEvent.LOG, {
+	      device.emit(_enum.deviceEvent.PROBE, {
 	        type: 'datapoint',
 	        data: data,
 	        deviceId: deviceId
@@ -11071,6 +11078,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                callback(res);
 	              }
 	            });
+
+	            // 发送数据端点
+	            _this6._sendMessage({
+	              topic: 'setPoint',
+	              deviceId: deviceId,
+	              data: data.data
+	            });
 	          }, function (err) {
 	            // 订阅失败
 	            console.error('Device[' + deviceId + '] send datapoint error');
@@ -11078,14 +11092,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	              _this6._devices[deviceId].emit(_enum.deviceEvent.ERROR, err);
 	            }
 	          });
-	        }
+	        } else {
+	          // 自动覆盖事件
+	          this._writeEvent(topic, deviceId, function (res) {
+	            if (callback && (0, _lang.isFunction)(callback)) {
+	              res.deviceId = deviceId;
+	              callback(res);
+	            }
+	          });
 
-	        // 发送数据端点
-	        this._sendMessage({
-	          topic: 'setPoint',
-	          deviceId: deviceId,
-	          data: data.data
-	        });
+	          // 发送数据端点
+	          this._sendMessage({
+	            topic: 'setPoint',
+	            deviceId: deviceId,
+	            data: data.data
+	          });
+	        }
 	      }
 	    }
 
@@ -14652,6 +14674,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	        });
 	      } else {
+	        // 覆盖事件
+	        this._writeEvent(topic, deviceId, function (res) {
+	          if (callback && (0, _lang.isFunction)(callback)) {
+	            callback({ data: res, deviceId: deviceId });
+	          }
+	        });
 	        // 订阅成功发送自动获取数据端点
 	        this._sendMessage({ topic: 'sendPrope', deviceId: deviceId, data: params });
 	      }

@@ -411,7 +411,7 @@ function fetchLogs() {
         alert('sdk还没有初始化')
         return
     }
-    socketObj.emit('log', function(res) {
+    socketObj.on('log', function(res) {
         if (res.data) {
             var obj = res.data
             obj.time = new Date(obj.timestamp).toString()

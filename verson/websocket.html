@@ -259,7 +259,10 @@ function initWebSocketConnect() {
             // 1.主动获取数据端点，处理数据端点返回，获取设备的数据端点
             item.emit('probe', function(data) {
                 console.log(data)
-                if (!data.data || !data.data.length) return
+                if (!data.data || !data.data.length) {
+                    dataPoint[item.id] = []
+                    return
+                }
                 var data_point = data.data.sort(function(a, b) {
                     return a.index - b.index
                 })
@@ -371,7 +374,7 @@ function change() {
             if (res.status === 0) {
                 alert("发送成功");
                 // 需要手动更新页面的端点
-                deviceProb(res.deviceId, [{
+                deviceProb(item.id, [{
                     index: $('#index')[0].value * 1, // 数据端点索引
                     value: $('#dataval')[0].value // 数据端点值
                 }])
