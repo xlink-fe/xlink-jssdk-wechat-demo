@@ -144,6 +144,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	          console.error('type do not exsit');
 	          throw new Error('type do not exsit');
 	        }
+	        if (this.option.RES) {
+	          if (!/[0-9a-zA-Z]{1,16}/.test(this.option.RES)) {
+	            console.error('登录源限定：字段可选，1到16个字符，仅允许数字和字母');
+	            throw new Error('登录源限定：字段可选，1到16个字符，仅允许数字和字母');
+	          }
+	        }
 	      }
 	    }
 	  }, {
@@ -172,11 +178,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	              break;
 	            case _enum.SDKType.MQTT:
 	              this.clientId = _enum.clientIds.v5[this.option.type];
+	              if (this.option.type === 'app' && this.option.RES !== undefined) {
+	                this.clientId = this.clientId + 'RES:' + this.option.RES + ';';
+	              }
 	              var v5 = new _mqtt2.default(this, this.option);
 	              v5.initMqttClient(this.clientId);
 	              break;
 	            case _enum.SDKType.PROBE:
 	              this.clientId = _enum.clientIds.v6[this.option.type];
+	              if (this.option.type === 'app' && this.option.RES !== undefined) {
+	                this.clientId = this.clientId + 'RES:' + this.option.RES + ';';
+	              }
 	              var v6 = new _v2.default(this, this.option);
 	              v6.initMqttClient(this.clientId);
 	              break;
@@ -10790,6 +10802,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        console.log(result);
 	        if (result.deviceId && this._devices[result.deviceId]) {
 	          this._devices[result.deviceId].emit(_enum.deviceEvent.EVENT, result);
+	          // 添加设备告警事件
+	          if (result.status === 2 || result.status === 8) {
+	            this._devices[result.deviceId].emit(_enum.deviceEvent.ALERT, result);
+	          }
 	        }
 	      }
 	    }
@@ -10901,9 +10917,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 
 	            // 3.设备日志
-	            device.on(_enum.deviceEvent.LOG, function (cb) {
-	              _this3._log(item.device_id, cb);
-	            });
+	            _this3._log(item.device_id);
 
 	            // 4.订阅设备上报
 	            _this3.deviceSubscribe(item.device_id);
@@ -10970,7 +10984,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return;
 	      }
 	      var device = this._devices[deviceId];
-	      device.emit(_enum.deviceEvent.DATA, {
+	      device.emit(_enum.deviceEvent.LOG, {
 	        type: 'datapoint',
 	        data: data,
 	        deviceId: deviceId
@@ -10981,7 +10995,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  }, {
 	    key: '_log',
-	    value: function _log(deviceId, callback) {
+	    value: function _log(deviceId) {
 	      var _this5 = this;
 
 	      if (!deviceId || !this._devices[deviceId]) {
@@ -10993,12 +11007,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._client.subscribe(topic + '/' + deviceId).then(function () {
 	          // 1.写进事件,方便全局调用获取
 	          _this5._writeEvent(topic, deviceId, function (data) {
-	            if (callback && (0, _lang.isFunction)(callback)) {
-	              callback({
-	                data: data,
-	                deviceId: deviceId
-	              });
-	            }
+	            _this5._logEvent(data, deviceId);
 	          });
 	        }, function (err) {
 	          // 订阅失败
@@ -11007,6 +11016,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _this5._devices[deviceId].emit(_enum.deviceEvent.ERROR, err);
 	          }
 	        });
+	      }
+	    }
+
+	    // 设备日志event
+
+	  }, {
+	    key: '_logEvent',
+	    value: function _logEvent(data, deviceId) {
+	      if (!deviceId || !this._devices[deviceId]) {
+	        console.error('deviceId or Device is not exit');
+	        return;
+	      }
+	      var device = this._devices[deviceId];
+	      device.emit(_enum.deviceEvent.LOG, {
+	        data: data,
+	        deviceId: deviceId
+	      });
+
+	      // 设备上下线
+	      if (data.type === 1) {
+	        device.emit(_enum.deviceEvent.STATUSCHANGE, deviceStatus.ONLINE);
+	      } else if (data.type === 2) {
+	        device.emit(_enum.deviceEvent.STATUSCHANGE, deviceStatus.OFFLINE);
 	      }
 	    }
 

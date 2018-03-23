@@ -331,7 +331,7 @@ function initMqttConnect() {
             })
             
             // 3.监听设备告警
-            item.on('event', function(data){
+            item.on('alert', function(data){
                 console.log(data)
                 var str = '<li class="list-group-item"><div>'+data.msg+'</div><div>'+data.message+'</div></li>'
                 console.log(str)
@@ -341,6 +341,12 @@ function initMqttConnect() {
 
             // 4.获取设备日志
             fetchLogs(item)
+
+            // 5.监听设备上下线
+            item.on('statuschange', function(status){
+                // 设备状态改变，上线(1)或者下线(0)
+                upOnlineStatus(item.pid, item.id)
+            })
         })
     })
 
@@ -357,7 +363,7 @@ function fetchLogs(socketObject) {
         console.error('sdk还没有初始化')
         return
     }
-    socketObject.emit('log', function(res) {
+    socketObject.on('log', function(res) {
         console.log(res)
         console.log(socketObject)
         if (res.data) {
@@ -369,10 +375,10 @@ function fetchLogs(socketObject) {
             $('#logsList' + res.deviceId).append(str)
             
             // 获取设备日志上下线通知,调用resetful接口获取最终的状态
-            if (res.data.type == 1 || res.data.type == 2) {
-                console.log(res.data.type)
-                upOnlineStatus(socketObject.pid, socketObject.id)
-            }
+            // if (res.data.type == 1 || res.data.type == 2) {
+            //     console.log(res.data.type)
+            //     upOnlineStatus(socketObject.pid, socketObject.id)
+            // }
         }
     })
 }
