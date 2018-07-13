@@ -4,7 +4,7 @@
 参考[微信公众号配置](https://docs.xlink.cn/pages/viewpage.action?pageId=4063254)完成应用配置
 
 #### 第二步：把api的index.js里面代码地址换成相应的云智易应用APPID
-![图1](./resource/image/setter.png)
+![图1](./resource/image/setting.png)
 
 
 #### 第三步：使用微信开发者工具访问页面
