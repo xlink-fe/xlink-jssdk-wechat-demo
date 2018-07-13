@@ -1,9 +1,8 @@
-// var baseUrl = 'http://wx.xlink.cn' // 云智易微信refustFul地址（如独立部署找相应的地址）
-// var platformUrl = 'http://api2.xlink.cn' // 云智易平台URL（如独立部署找相应的地址）
+var baseUrl = 'http://wx.xlink.cn' // 云智易微信refustFul地址（如独立部署找相应的地址）
+var platformUrl = 'http://api2.xlink.cn' // 云智易平台URL（如独立部署找相应的地址）
 
 var XLINKAPPID = '2e07d2b1f2cdae00' // 云智易平台应用AppId（请修改对应的云智易应用appId）
-var baseUrl = 'http://139.196.164.250:8081' // 云智易微信refustFul地址（如独立部署找相应的地址）
-var platformUrl = 'http://api-test.xlink.io:1080' // 云智易平台URL（如独立部署找相应的地址）
+
 
 // 封装请求
 function sdkAjax(type, url, cb, errcb) {

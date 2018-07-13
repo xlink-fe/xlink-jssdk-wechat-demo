@@ -299,8 +299,7 @@ function initPropeConnect() {
     if (!devices.length) return
     ws = new XSDK('prope', {
         type: 'app',
-        // host: 'ws://mqtt.xlink.cn:23801/mqtt',
-        host: 'ws://54.222.229.62:8080/mqtt',
+        host: 'ws://mqtt.xlink.cn:23801/mqtt',
         userid: userid + '', // 用户在云智易平台的user_id，通过获取OpenID接口获取(必须为字符串)
         authorize: authorize, // 用户在云智易平台的authorize，通过获取OpenID接口获取(必须为字符串)
         keepAliveInterval: 40, // 非必填，mqtt通讯时长，默认为40s，每40s发送ping请求

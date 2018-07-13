@@ -28,6 +28,7 @@
         <li role="presentation"><a href="prope.html">Prope</a></li>
         <li role="presentation"><a href="websocket.html">Websocket</a></li>
     </ul>
+    <div id="openid"></div>
     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#myModal" >
         显示设备日志
     </button>
@@ -197,6 +198,7 @@ fetchOpenId(function(data) {
 
 // 2.获取token
 function getAppToken () {
+    $('#openid').html(window.localStorage.getItem('openId'))
     fetchToken(function(data) {
         window.localStorage.setItem('accessToken', data.access_token)
         userid = data.user_id
@@ -296,8 +298,7 @@ function initMqttConnect() {
     if (!devices.length) return
     ws = new XSDK('mqtt', {
         type: 'app',
-        // host: 'ws://mqtt.xlink.cn:23801/mqtt',
-        host: 'ws://54.222.229.62:8080/mqtt',
+        host: 'ws://mqtt.xlink.cn:23801/mqtt',
         userid: userid + '', // 用户在云智易平台的user_id，通过获取OpenID接口获取(必须为字符串)
         authorize: authorize, // 用户在云智易平台的authorize，通过获取OpenID接口获取(必须为字符串)
         keepAliveInterval: 40, // 非必填，mqtt通讯时长，默认为40s，每40s发送ping请求
