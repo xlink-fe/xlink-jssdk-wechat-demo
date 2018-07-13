@@ -24,6 +24,12 @@
 
 <body style="overflow: auto;padding: 10px;box-sizing: border-box;">
     <!-- 设备列表 -->
+    <ul class="nav nav-tabs" style="margin-bottom:30px;">
+        <li role="presentation" class="active"><a href="javascript:void(0)">单设备混合</a></li>
+        <li role="presentation" ><a href="verson/mqtt.html">Mqtt</a></li>
+        <li role="presentation"><a href="verson/prope.html">Prope</a></li>
+        <li role="presentation"><a href="verson/websocket.html">Websocket</a></li>
+    </ul>
     <div id="device" class="form-horizontal"></div>
     <!-- 索引端点 -->
     <h4>发送数据端点</h4>
@@ -84,6 +90,7 @@
 <script type="text/javascript" src="static/jquery-3.2.1.min.js"></script>
 <script type="text/javascript" src="static/xsdk.js"></script>
 <script type="text/javascript" src="static/bootstrap.min.js"></script>
+<script type="text/javascript" src="api/index.js"></script>
 <script>
 // 注意此demo必须在配好微信公众号，和云智易应用下运行！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！(参考https://docs.xlink.cn/pages/viewpage.action?pageId=4063254)
 // 配置完公众号后，请更改以下代码中的云智易appId
@@ -92,23 +99,6 @@
 // 例如放到服务器地址为http://test.cn的wechat文件夹下面则访问，且微信的公众号id为wx6bce565776a81ced
 // 则访问地址为：
 // https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx6bce565776a81ced&redirect_uri=http://test.cn/wechat/index.html&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect
-
-// 封装请求
-function sdkAjax(type, url, cb, errcb) {
-    $.ajax({
-        url: url,
-        type: type,
-        beforeSend: function(xhr) { xhr.setRequestHeader('Access-Token', window.localStorage.getItem('accessToken')) }, //这里设置header
-        success: function(data) {
-            cb(data)
-        },
-        error: function(err) {
-            if (errcb == undefined) return
-            errcb(err)
-        }
-    })
-}
-
 
 
 var ws = null
@@ -119,78 +109,53 @@ var socketObj = null // 当前设备的类
 var conn_prot = 1 // 1为mqtt,2为websocket
 var userid = ''
 var authorize = ''
-var baseUrl = 'http://wx.xlink.cn' // 云智易微信refustFul地址（如独立部署找相应的地址）
-var platformUrl = 'http://api2.xlink.cn' // 云智易平台URL（如独立部署找相应的地址）
-var XLINKAPPID = '2e07d2b1f2cdae00' // 云智易平台应用AppId（请修改对应的云智易应用appId）
 
-// 获取url上的code参数
-function getSearchCode() {
-    let search = location.href
-    let searchs = {}
-    let strs
-    if (search.indexOf('?') !== -1) {
-        search = search.substr(search.indexOf('?') + 1)
-        strs = search.split('&')
-        for (let i = 0; i < strs.length; i++) {
-            searchs[strs[i].split('=')[0]] = decodeURIComponent(strs[i].split('=')[1])
-        }
-    }
-    window.localStorage.setItem('code', searchs['code'])
-    return searchs['code']
-}
 
-// 获取虚拟设备的端口
-function getVdevice (productId, deviceId, cb, errcb) {
-    sdkAjax('get', platformUrl + '/v2/product/' + productId + '/v_device/' + deviceId, cb,errcb)
-}
-
-// 获取openid
-sdkAjax('get', baseUrl + '/v2/wechat_gateway/' + XLINKAPPID + '/get_open_id?code=' + getSearchCode(), function(data) {
+// 1.获取openID
+fetchOpenId(function(data) {
     console.log(data)
     window.localStorage.setItem('openId', data.open_id)
-    getToken()
+    getAppToken()
 
 }, function() {
     // 因为code码只能使用一次，页面刷新的时候code失效，所以这样避免页面错误
     if (window.localStorage.getItem('openId')) {
-        getToken()
+        getAppToken()
     } else {
         alert('请求出错')
     }
 })
 
-
-
-
-
-function getToken() {
-    // 获取管理台的token
-    sdkAjax('get', baseUrl + '/v2/wechat_gateway/' + XLINKAPPID + '/wx_access_token?open_id=' + window.localStorage.getItem('openId') + '&resource=wechat', function(data) {
+// 2.获取token
+function getAppToken () {
+    fetchToken(function(data) {
         window.localStorage.setItem('accessToken', data.access_token)
         userid = data.user_id
         authorize = data.authorize
+        fetchDevice()
+    })
+}
 
-        // 获取设备的列表
-        sdkAjax('get', baseUrl + '/v2/wechat_gateway/' + XLINKAPPID + '/wx_device_list?access_token=XLINKUserAccessToken&open_id=' + window.localStorage.getItem('openId'), function(data) {
+// 3.获取设备列表
+function fetchDevice () {
+    fetchDeviceList(function(data) {
+        devices = data.devices
 
-
-            devices = data.devices
-
-            var str = '<div class="form-group"><label class="col-sm-2 control-label">当前设备</label><div class="col-sm-10"><select id="deviceList" class="form-control">'
-            devices.forEach(function(item) {
-                str += '<option value="' + item.device_id + '">' + item.device_mac + '</option>'
-            })
-            str += '</select></div></div>'
-            $('#device').html(str)
-
-            $('#deviceList')[0].onchange = function() {
-                // 如果所有设备的协议相同，不用销毁sdk,直接操作devicesList数组
-                destorySdk()
-                initSdk()
-            }
-
-            initSdk()      
+        var str = '<div class="form-group"><label class="col-sm-2 control-label">当前设备</label><div class="col-sm-10"><select id="deviceList" class="form-control">'
+        devices.forEach(function(item) {
+            str += '<option value="' + item.device_id + '">' + item.device_mac + '</option>'
         })
+
+        str += '</select></div></div>'
+        $('#device').html(str)
+
+        $('#deviceList')[0].onchange = function() {
+            // 如果所有设备的协议相同，不用销毁sdk,直接操作devicesList数组
+            destorySdk()
+            initSdk()
+        }
+
+        initSdk()      
     })
 }
 
@@ -448,10 +413,9 @@ function fetchLogs() {
         alert('sdk还没有初始化')
         return
     }
-    socketObj.emit('log', function(res) {
-        console.log(res)
+    socketObj.on('log', function(res) {
         if (res.data) {
-            var obj = JSON.parse(JSON.stringfy(res.data))
+            var obj = res.data
             obj.time = new Date(obj.timestamp).toString()
             var str = '<li class="list-group-item"><div>'+obj.time+'</div><div>'+obj.msg+'</div></li>'
             console.log(str)
